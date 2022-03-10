@@ -18,11 +18,35 @@ interface File {
   exifTimestamp: number
 }
 
+function getPassword() {
+  const params = new URLSearchParams(window.location.search)
+  return params.get('password') || ''
+}
+
 function shuffle<T>(arr: T[]) {
   return arr
     .map(value => ({ value, sort: Math.random() }))
     .sort((a, b) => a.sort - b.sort)
     .map(({ value }) => value)
+}
+
+function Tracklist({
+  value,
+  setValue,
+}: {
+  value: string
+  setValue: (arg0: string) => void
+}) {
+  return (
+    <textarea
+      id="tracklist"
+      placeholder="tracklist"
+      onChange={event => setValue(event.target.value)}
+      value={value}
+      rows={5}
+      cols={50}
+    />
+  )
 }
 
 function AdminPanel() {
@@ -31,9 +55,8 @@ function AdminPanel() {
   const [value, setValue] = useState('')
   const [user, setUser] = useState('')
   const [loading, setLoading] = useState('')
-  const params = new URLSearchParams(window.location.search)
 
-  const password = params.get('password')
+  const password = getPassword()
   return (
     <form
       onSubmit={async event => {
@@ -92,14 +115,7 @@ function AdminPanel() {
               onChange={event => setUser(event.target.value)}
             />
             <label htmlFor="tracklist">Tracklist</label>
-            <textarea
-              id="tracklist"
-              placeholder="tracklist"
-              onChange={event => setValue(event.target.value)}
-              value={value}
-              rows={5}
-              cols={50}
-            />
+            <Tracklist value={value} setValue={val => setValue(val)} />
           </div>
           <button type="submit">Submit</button>
         </div>
@@ -111,10 +127,12 @@ function AdminPanel() {
 }
 
 function Comments({ post }: { post: File }) {
+  const [showForm, setShowForm] = useState(false)
   const { comments } = post
 
   return (
-    <div>
+    <div className="comments">
+      <div>Comments</div>
       {comments.length ? (
         comments.map(comment => (
           <div key={JSON.stringify(comment)} className="comment">
@@ -129,7 +147,13 @@ function Comments({ post }: { post: File }) {
       ) : (
         <div>No comments yet! Add one!</div>
       )}
-      <CommentForm post={post} />
+      <button
+        onClick={() => setShowForm(f => !f)}
+        style={{ color: 'purple', margin: '1em', background: 'yellow' }}
+      >
+        {showForm ? 'Hide comment form' : 'Submit a comment'}
+      </button>
+      {showForm ? <CommentForm post={post} /> : null}
     </div>
   )
 }
@@ -140,26 +164,98 @@ function CommentForm({ post }: { post: File }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<unknown>()
   return (
+    <div className="commentform">
+      <form
+        onSubmit={async event => {
+          try {
+            event.preventDefault()
+            if (value || comment) {
+              setLoading(true)
+              setError(undefined)
+
+              const data = new FormData()
+              data.append('message', comment)
+              data.append('user', value)
+              data.append('filename', post.filename)
+              data.append('password', 'purple')
+              await myfetchjson(API_ENDPOINT + '/postComment', {
+                method: 'POST',
+                body: data,
+              })
+              setValue('')
+              setComment('')
+            }
+          } catch (e) {
+            setError(e)
+          } finally {
+            setLoading(false)
+          }
+        }}
+      >
+        {error ? <div className="error">{`${error}`}</div> : null}
+        {loading ? (
+          <div>Loading...</div>
+        ) : (
+          <div className="mygrid">
+            <label htmlFor="name">Name</label>
+            <input
+              type="text"
+              id="name"
+              value={value}
+              onChange={event => setValue(event.target.value)}
+            />
+            <label htmlFor="post">Post</label>
+            <textarea
+              id="post"
+              value={comment}
+              onChange={event => setComment(event.target.value)}
+            />
+          </div>
+        )}
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+  )
+}
+
+function EditIcon({ onClick }: { onClick: () => void }) {
+  return (
+    <button onClick={onClick}>
+      <svg style={{ width: 24, height: 24 }} viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          d="M14.06,9L15,9.94L5.92,19H5V18.08L14.06,9M17.66,3C17.41,3 17.15,3.1 16.96,3.29L15.13,5.12L18.88,8.87L20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18.17,3.09 17.92,3 17.66,3M14.06,6.19L3,17.25V21H6.75L17.81,9.94L14.06,6.19Z"
+        />
+      </svg>
+    </button>
+  )
+}
+
+function EditPost({ post }: { post: File }) {
+  const [username, setUsername] = useState(post.user)
+  const [message, setMessage] = useState(post.message)
+  const [error, setError] = useState<unknown>()
+  const [loading, setLoading] = useState(false)
+  const password = getPassword()
+  return (
     <form
       onSubmit={async event => {
         try {
           event.preventDefault()
-          if (value || comment) {
+          if (username || message) {
             setLoading(true)
             setError(undefined)
 
             const data = new FormData()
             console.log({ post })
-            data.append('message', comment)
-            data.append('user', value)
+            data.append('message', message)
+            data.append('user', username)
             data.append('filename', post.filename)
-            data.append('password', 'purple')
-            await myfetchjson(API_ENDPOINT + '/postComment', {
+            data.append('password', password)
+            await myfetchjson(API_ENDPOINT + '/editPost', {
               method: 'POST',
               body: data,
             })
-            setValue('')
-            setComment('')
           }
         } catch (e) {
           setError(e)
@@ -168,47 +264,43 @@ function CommentForm({ post }: { post: File }) {
         }
       }}
     >
-      {error ? <div className="error">{`${error}`}</div> : null}
-      {loading ? (
-        <div>Loading...</div>
-      ) : (
+      <div>
+        {error ? <div className="error">{`${error}`}</div> : null}
+        {loading ? <div>Submitting update...</div> : null}
+        <h1>Edit some stuff</h1>
         <div className="mygrid">
-          <label htmlFor="name">Name</label>
+          <label htmlFor="username">Edit DJ name</label>{' '}
           <input
+            id="username"
             type="text"
-            id="name"
-            value={value}
-            onChange={event => setValue(event.target.value)}
+            value={username}
+            onChange={event => setUsername(event.target.value)}
           />
-          <label htmlFor="post">Post</label>
-          <textarea
-            id="post"
-            value={comment}
-            onChange={event => setComment(event.target.value)}
-          />
+          <label htmlFor="tracklist">Edit tracklist</label>{' '}
+          <Tracklist value={message} setValue={val => setMessage(val)} />
         </div>
-      )}
-      <button type="submit">Submit</button>
+      </div>
     </form>
   )
 }
-function Post({ post }: { post: File }) {
+
+function DisplayPost({ post }: { post: File }) {
   const [showTracklist, setShowTracklist] = useState(true)
   const [showComments, setShowComments] = useState(true)
   const file = BUCKET + '/' + post.filename
   return (
-    <div className="post">
+    <div>
       <div className="date">{new Date(post.timestamp).toLocaleString()}</div>
       <div className="dj">DJ {post.user}</div>
-      <a href="#" onClick={() => setShowTracklist(t => !t)}>
-        {showTracklist ? 'Hide' : 'Show'} tracklist
-      </a>
+      <button onClick={() => setShowTracklist(t => !t)}>
+        {showTracklist ? 'Hide tracklist' : 'Show tracklist'}
+      </button>
       {showTracklist ? <div className="tracklist">{post.message}</div> : null}
       <br />
 
-      <a href="#" onClick={() => setShowComments(t => !t)}>
+      <button onClick={() => setShowComments(t => !t)}>
         {showComments ? 'Hide' : 'Show'} comments
-      </a>
+      </button>
       {showComments ? <Comments post={post} /> : null}
       <br />
       <a href={file}>Download</a>
@@ -216,6 +308,22 @@ function Post({ post }: { post: File }) {
       <audio controls className="audiofile">
         <source src={file} />
       </audio>
+    </div>
+  )
+}
+
+function Post({ post }: { post: File }) {
+  const [editing, setEditing] = useState(false)
+  const password = getPassword()
+  return (
+    <div className="post">
+      {password ? (
+        <div style={{ float: 'right' }}>
+          <EditIcon onClick={() => setEditing(!editing)} />
+        </div>
+      ) : null}
+
+      {editing ? <EditPost post={post} /> : <DisplayPost post={post} />}
     </div>
   )
 }

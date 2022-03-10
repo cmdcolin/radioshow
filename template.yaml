@@ -133,6 +133,30 @@ Resources:
             Method: post
             ApiId: !Ref MyApi
 
+
+  EditPostFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/editPost/
+      Handler: app.handler
+      Runtime: nodejs12.x
+      Timeout: 3
+      MemorySize: 128
+      Environment:
+        Variables:
+          Password: !Ref SecretPassword
+      Policies:
+        - AmazonDynamoDBFullAccess
+      Events:
+        UploadAssetAPI:
+          Type: HttpApi
+          Properties:
+            Path: /editPost
+            Method: post
+            ApiId: !Ref MyApi
+
+
+
   CommentReadFunction:
     Type: AWS::Serverless::Function
     Properties:

@@ -79,8 +79,10 @@ textarea {
   text-shadow: 4px 4px #000;
 }
 
-button[type='submit'] {
+button {
   font-size: 1em;
+  background: lavender;
+  color: purple;
 }
 
 .container {
@@ -107,10 +109,26 @@ button[type='submit'] {
 }
 
 .tracklist {
-  background-image: linear-gradient(to bottom right, white, blue);
+  background-image: linear-gradient(to bottom right, green, blue);
+  color: orange;
+  padding: 1em;
+  margintop: 1em;
 }
 
 .comment {
   background: lightblue;
   color: red;
+}
+
+.editicon: {
+  float: right;
+}
+
+.comments {
+  background-image: linear-gradient(to bottom right, blue, brown);
+  padding: 1em;
+}
+
+.commentform {
+  padding: 1em;
 }
