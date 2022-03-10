@@ -129,3 +129,6 @@ button {
 .deletepost {
   margin: 2vw;
 }
+.deletepost > button {
+  margin: 2vw;
+}

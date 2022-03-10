@@ -24,7 +24,7 @@ const getUploadURL = async function (event) {
     const Key = `${timestamp}-${filename}`
 
     await DB.delete({
-      TableName: filesRadio,
+      TableName: 'filesRadio',
       Key: {
         filename,
       },

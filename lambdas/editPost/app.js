@@ -23,8 +23,8 @@ const getUploadURL = async function (event) {
     const timestamp = +Date.now()
     const Key = `${timestamp}-${filename}`
 
-    await DB.put({
-      TableName: filesRadio,
+    await DB.update({
+      TableName: 'filesRadio',
       Key: {
         filename,
       },

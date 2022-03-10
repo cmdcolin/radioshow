@@ -322,7 +322,9 @@ function DeletePost({
   return (
     <div className="deletepost">
       {error ? <div className="error">{`${error}`}</div> : null}
-      {loading ? 'Deleting post...' : null}
+      {loading ? 'Deleting set...' : null}
+      <p>DJ {post.user}</p>
+      <p>Filename {post.filename}</p>
       <button
         onClick={async event => {
           try {
@@ -333,10 +335,11 @@ function DeletePost({
             const data = new FormData()
             data.append('filename', post.filename)
             data.append('password', password)
-            await myfetchjson(API_ENDPOINT + '/editPost', {
+            await myfetchjson(API_ENDPOINT + '/deletePost', {
               method: 'POST',
               body: data,
             })
+            onComplete()
           } catch (e) {
             setError(e)
           } finally {
@@ -344,7 +347,7 @@ function DeletePost({
           }
         }}
       >
-        Are you sure you want to delete post?
+        Are you sure you want to delete set?
       </button>
       <button onClick={() => onComplete()}>Cancel</button>
     </div>
