@@ -26,7 +26,7 @@ const getUploadURL = async function (event) {
     }
     const timestamp = +Date.now()
     const Key = `${timestamp}-${filename}`
-    const ThumbKey = `${timestamp}-thumb-${filename}`
+    const ThumbKey = `${timestamp}-thumb-${pic}`
 
     const uploadThumbnailURL = pic
       ? await s3.getSignedUrlPromise('putObject', {
@@ -57,7 +57,6 @@ const getUploadURL = async function (event) {
 
     return JSON.stringify({
       uploadURL,
-      uploadPicURL,
       uploadThumbnailURL,
       Key,
     })

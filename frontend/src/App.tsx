@@ -10,6 +10,7 @@ const BUCKET =
 interface File {
   timestamp: number
   filename: string
+  thumbnail: string
   user: string
   message: string
   date: string
@@ -93,9 +94,11 @@ function AdminPanel() {
             if (res.uploadThumbnailURL) {
               await myfetch(res.uploadThumbnailURL, {
                 method: 'PUT',
-                body: file,
+                body: pic,
               })
             }
+            setLoading('Done!')
+            setTimeout(() => setLoading(''), 5000)
           } catch (e) {
             console.error(e)
             setError(e)
@@ -149,7 +152,13 @@ function AdminPanel() {
   )
 }
 
-function Comments({ post }: { post: File }) {
+function Comments({
+  post,
+  forceUpdate,
+}: {
+  post: File
+  forceUpdate: () => void
+}) {
   const [showForm, setShowForm] = useState(false)
   const { comments = [] } = post
 
@@ -176,12 +185,18 @@ function Comments({ post }: { post: File }) {
       >
         {showForm ? 'Hide comment form' : 'Submit a comment'}
       </button>
-      {showForm ? <CommentForm post={post} /> : null}
+      {showForm ? <CommentForm post={post} forceUpdate={forceUpdate} /> : null}
     </div>
   )
 }
 
-function CommentForm({ post }: { post: File }) {
+function CommentForm({
+  post,
+  forceUpdate,
+}: {
+  post: File
+  forceUpdate: () => void
+}) {
   const [value, setValue] = useState('')
   const [comment, setComment] = useState('')
   const [loading, setLoading] = useState(false)
@@ -207,6 +222,7 @@ function CommentForm({ post }: { post: File }) {
               })
               setValue('')
               setComment('')
+              forceUpdate()
             }
           } catch (e) {
             setError(e)
@@ -377,17 +393,25 @@ function DeletePost({
   )
 }
 
-function DisplayPost({ post }: { post: File }) {
-  const [showTracklist, setShowTracklist] = useState(true)
-  const [showComments, setShowComments] = useState(true)
-  const { timestamp, user, message, filename } = post
+function DisplayPost({
+  post,
+  forceUpdate,
+}: {
+  post: File
+  forceUpdate: () => void
+}) {
+  const [showTracklist, setShowTracklist] = useState(false)
+  const [showComments, setShowComments] = useState(false)
+  const { timestamp, user, message, filename, thumbnail } = post
   const file = BUCKET + '/' + filename
+  const thumb = BUCKET + '/' + thumbnail
 
-  console.log({ timestamp })
   return (
-    <div>
+    <div className="displaypost">
       <div className="date">{new Date(timestamp).toLocaleString()}</div>
       <div className="dj">DJ {user}</div>
+      {thumbnail ? <img src={thumb} className="thumbnail" /> : null}
+      <br />
       <button onClick={() => setShowTracklist(t => !t)}>
         {showTracklist ? 'Hide tracklist' : 'Show tracklist'}
       </button>
@@ -395,12 +419,13 @@ function DisplayPost({ post }: { post: File }) {
       <br />
 
       <button onClick={() => setShowComments(t => !t)}>
-        {showComments ? 'Hide' : 'Show'} comments
+        {showComments ? 'Hide' : 'Show'} comments ({post.comments?.length || 0})
       </button>
-      {showComments ? <Comments post={post} /> : null}
+      {showComments ? <Comments post={post} forceUpdate={forceUpdate} /> : null}
       <br />
       <a href={file}>Download</a>
       <br />
+
       <audio controls className="audiofile">
         <source src={file} />
       </audio>
@@ -408,7 +433,7 @@ function DisplayPost({ post }: { post: File }) {
   )
 }
 
-function Post({ post }: { post: File }) {
+function Post({ post, forceUpdate }: { post: File; forceUpdate: () => void }) {
   const [editing, setEditing] = useState(false)
   const [deletePost, setDeletePost] = useState(false)
   const password = getPassword()
@@ -422,23 +447,43 @@ function Post({ post }: { post: File }) {
       ) : null}
 
       {editing ? (
-        <EditPost post={post} onComplete={() => setEditing(false)} />
+        <EditPost
+          post={post}
+          onComplete={() => {
+            forceUpdate()
+            setEditing(false)
+          }}
+        />
       ) : deletePost ? (
-        <DeletePost post={post} onComplete={() => setDeletePost(false)} />
+        <DeletePost
+          post={post}
+          onComplete={() => {
+            forceUpdate()
+            setDeletePost(false)
+          }}
+        />
       ) : (
-        <DisplayPost post={post} />
+        <DisplayPost post={post} forceUpdate={forceUpdate} />
       )}
     </div>
   )
 }
 
-function Posts({ posts }: { posts: File[] }) {
+function Posts({
+  posts,
+  forceUpdate,
+}: {
+  posts: File[]
+  forceUpdate: () => void
+}) {
   return (
-    <div className="container">
+    <div>
       <h1>{posts.length ? 'Posts:' : 'No files found'}</h1>
-      {posts.map(post => (
-        <Post key={post.filename} post={post} />
-      ))}
+      {posts
+        .sort((a, b) => a.timestamp - b.timestamp)
+        .map(post => (
+          <Post key={post.filename} post={post} forceUpdate={forceUpdate} />
+        ))}
     </div>
   )
 }
@@ -451,6 +496,7 @@ function App() {
   const refB = useRef(20)
   const [posts, setPosts] = useState<File[]>()
   const [error, setError] = useState<unknown>()
+  const [forceUpdate, setForceUpdate] = useState(0)
 
   useEffect(() => {
     ;(async () => {
@@ -461,7 +507,7 @@ function App() {
         setError(e)
       }
     })()
-  }, [])
+  }, [forceUpdate])
 
   useEffect(() => {
     const canvas = ref.current
@@ -543,13 +589,18 @@ function App() {
           />
         </div>
         {password ? <AdminPanel /> : null}
-        {error ? (
-          <h1>{`${error}`}</h1>
-        ) : posts ? (
-          <Posts posts={posts} />
-        ) : (
-          <h1>Loading...</h1>
-        )}
+        <div className="container">
+          {error ? (
+            <h1>{`${error}`}</h1>
+          ) : posts ? (
+            <Posts
+              posts={posts}
+              forceUpdate={() => setForceUpdate(u => u + 1)}
+            />
+          ) : (
+            <h1>Loading...</h1>
+          )}
+        </div>
         {shuffle(files).map(elt => (
           <img
             key={elt}
