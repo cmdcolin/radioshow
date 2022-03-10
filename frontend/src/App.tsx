@@ -110,17 +110,104 @@ function AdminPanel() {
   )
 }
 
+interface Comment {}
+
+function Comments({ post }: { post: File }) {
+  const [error, setError] = useState<unknown>()
+  const [comments, setComments] = useState<Comment[]>([])
+
+  return (
+    <div>
+      {error ? (
+        <div className="error">{`${error}`}</div>
+      ) : comments ? (
+        comments.map(comment => (
+          <div key={JSON.stringify(comment)} className="comment" />
+        ))
+      ) : (
+        <div>Loading comments...</div>
+      )}
+      <CommentForm post={post} />
+    </div>
+  )
+}
+
+function CommentForm({ post }: { post: File }) {
+  const [value, setValue] = useState('')
+  const [comment, setComment] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<unknown>()
+  return (
+    <form
+      onSubmit={async event => {
+        try {
+          event.preventDefault()
+          if (value || comment) {
+            setLoading(true)
+            setError(undefined)
+
+            const data = new FormData()
+            console.log({ post })
+            data.append('message', comment)
+            data.append('user', value)
+            data.append('filename', post.filename)
+            data.append('password', 'purple')
+            await myfetchjson(API_ENDPOINT + '/postComment', {
+              method: 'POST',
+              body: data,
+            })
+            setValue('')
+            setComment('')
+          }
+        } catch (e) {
+          setError(e)
+        } finally {
+          setLoading(false)
+        }
+      }}
+    >
+      {error ? <div className="error">{`${error}`}</div> : null}
+      {loading ? (
+        <div>Loading...</div>
+      ) : (
+        <div className="mygrid">
+          <label htmlFor="name">Name</label>
+          <input
+            type="text"
+            id="name"
+            value={value}
+            onChange={event => setValue(event.target.value)}
+          />
+          <label htmlFor="post">Post</label>
+          <textarea
+            id="post"
+            value={comment}
+            onChange={event => setComment(event.target.value)}
+          />
+        </div>
+      )}
+      <button type="submit">Submit</button>
+    </form>
+  )
+}
 function Post({ post }: { post: File }) {
-  const [tracklist, setTracklist] = useState(false)
+  const [showTracklist, setShowTracklist] = useState(true)
+  const [showComments, setShowComments] = useState(true)
   const file = BUCKET + '/' + post.filename
   return (
     <div className="post">
       <div className="date">{new Date(post.timestamp).toLocaleString()}</div>
       <div className="dj">DJ {post.user}</div>
-      <a href="#" onClick={() => setTracklist(t => !t)}>
-        {tracklist ? 'Hide' : 'Show'} tracklist
+      <a href="#" onClick={() => setShowTracklist(t => !t)}>
+        {showTracklist ? 'Hide' : 'Show'} tracklist
       </a>
-      {tracklist ? <div className="tracklist">{post.message}</div> : null}
+      {showTracklist ? <div className="tracklist">{post.message}</div> : null}
+      <br />
+
+      <a href="#" onClick={() => setShowComments(t => !t)}>
+        {showComments ? 'Hide' : 'Show'} comments
+      </a>
+      {showComments ? <Comments post={post} /> : null}
       <br />
       <a href={file}>Download</a>
       <br />
@@ -249,6 +336,7 @@ function App() {
         )}
         {shuffle(files).map(elt => (
           <img
+            key={elt}
             src={'gifs/' + elt}
             className="spacer"
             style={{ transform: `scale(${1 + Math.random() * 2})` }}
@@ -256,6 +344,7 @@ function App() {
         ))}
         {shuffle(files).map(elt => (
           <img
+            key={elt}
             src={'gifs/' + elt}
             className="spacer"
             style={{ transform: `scale(${1 + Math.random() * 2})` }}
@@ -263,6 +352,7 @@ function App() {
         ))}
         {shuffle(files).map(elt => (
           <img
+            key={elt}
             src={'gifs/' + elt}
             className="spacer"
             style={{ transform: `scale(${1 + Math.random() * 2})` }}

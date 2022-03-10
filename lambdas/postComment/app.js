@@ -2,7 +2,7 @@
 const AWS = require('aws-sdk')
 const multipart = require('./multipart')
 
-// const { AWS_REGION: region } = process.env;
+const { AWS_REGION: region } = process.env
 
 const DB = new AWS.DynamoDB.DocumentClient()
 
@@ -14,7 +14,7 @@ async function uploadComment({ message, user, filename }) {
     filename,
   }
   return DB.update({
-    TableName: 'files',
+    TableName: 'filesRadio',
     Key: {
       filename,
     },
@@ -36,7 +36,7 @@ exports.handler = async event => {
     const data = multipart.parse(event)
     const { message, user, filename, password } = data
 
-    if (password !== process.env.Password) {
+    if (password !== 'purple') {
       return {
         statusCode: 403,
         body: JSON.stringify({ message: 'Access denied' }),
