@@ -132,3 +132,9 @@ button {
 .commentform {
   padding: 1em;
 }
+
+.adminpanel {
+  margin: 2em;
+  padding: 1em;
+  background-image: linear-gradient(#8fc, #f93);
+}

@@ -58,6 +58,7 @@ function AdminPanel() {
 
   const password = getPassword()
   return (
+  <div className="adminpanel">
     <form
       onSubmit={async event => {
         event.preventDefault()
@@ -123,6 +124,7 @@ function AdminPanel() {
       {error ? <h1 className="error">{`${error}`}</h1> : null}
       {loading ? <h1 className="loading">{`${loading}`}</h1> : null}
     </form>
+    </div>
   )
 }
 

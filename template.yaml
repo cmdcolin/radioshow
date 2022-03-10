@@ -156,6 +156,28 @@ Resources:
             ApiId: !Ref MyApi
 
 
+  DeletePostFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lambdas/deletePost/
+      Handler: app.handler
+      Runtime: nodejs12.x
+      Timeout: 3
+      MemorySize: 128
+      Environment:
+        Variables:
+          Password: !Ref SecretPassword
+      Policies:
+        - AmazonDynamoDBFullAccess
+      Events:
+        UploadAssetAPI:
+          Type: HttpApi
+          Properties:
+            Path: /deletePost
+            Method: post
+            ApiId: !Ref MyApi
+
+
 
   CommentReadFunction:
     Type: AWS::Serverless::Function
