@@ -14,7 +14,7 @@ interface File {
   message: string
   date: string
   contentType: string
-  comments: unknown[]
+  comments: { timestamp: number; user: string; message: string }[]
   exifTimestamp: number
 }
 
@@ -110,22 +110,24 @@ function AdminPanel() {
   )
 }
 
-interface Comment {}
-
 function Comments({ post }: { post: File }) {
-  const [error, setError] = useState<unknown>()
-  const [comments, setComments] = useState<Comment[]>([])
+  const { comments } = post
 
   return (
     <div>
-      {error ? (
-        <div className="error">{`${error}`}</div>
-      ) : comments ? (
+      {comments.length ? (
         comments.map(comment => (
-          <div key={JSON.stringify(comment)} className="comment" />
+          <div key={JSON.stringify(comment)} className="comment">
+            <div className="comment">
+              {comment.user} ({new Date(comment.timestamp).toLocaleDateString()}
+              ):
+              <br />
+              {comment.message}
+            </div>
+          </div>
         ))
       ) : (
-        <div>Loading comments...</div>
+        <div>No comments yet! Add one!</div>
       )}
       <CommentForm post={post} />
     </div>

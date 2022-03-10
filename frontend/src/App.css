@@ -109,3 +109,8 @@ button[type='submit'] {
 .tracklist {
   background-image: linear-gradient(to bottom right, white, blue);
 }
+
+.comment {
+  background: lightblue;
+  color: red;
+}
