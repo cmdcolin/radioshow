@@ -58,72 +58,72 @@ function AdminPanel() {
 
   const password = getPassword()
   return (
-  <div className="adminpanel">
-    <form
-      onSubmit={async event => {
-        event.preventDefault()
-        try {
-          setError(undefined)
-          const data = new FormData()
-          const file = files?.[0]
-          if (!file) {
-            throw new Error('No files submitted')
+    <div className="adminpanel">
+      <form
+        onSubmit={async event => {
+          event.preventDefault()
+          try {
+            setError(undefined)
+            const data = new FormData()
+            const file = files?.[0]
+            if (!file) {
+              throw new Error('No files submitted')
+            }
+            data.append('message', value)
+            data.append('user', user)
+            data.append('filename', file.name)
+            data.append('contentType', file.type)
+            data.append('password', password || '')
+
+            setLoading('Uploading metadata....')
+            const res = await myfetchjson(API_ENDPOINT + '/postFile', {
+              method: 'POST',
+              body: data,
+            })
+            setLoading('Uploading mp3...')
+
+            await myfetch(res.uploadURL, {
+              method: 'PUT',
+              body: file,
+            })
+          } catch (e) {
+            console.error(e)
+            setError(e)
+          } finally {
+            setLoading('')
           }
-          data.append('message', value)
-          data.append('user', user)
-          data.append('filename', file.name)
-          data.append('contentType', file.type)
-          data.append('password', password || '')
-
-          setLoading('Uploading metadata....')
-          const res = await myfetchjson(API_ENDPOINT + '/postFile', {
-            method: 'POST',
-            body: data,
-          })
-          setLoading('Uploading mp3...')
-
-          await myfetch(res.uploadURL, {
-            method: 'PUT',
-            body: file,
-          })
-        } catch (e) {
-          console.error(e)
-          setError(e)
-        } finally {
-          setLoading('')
-        }
-      }}
-    >
-      {password ? (
-        <div className="form">
-          <div className="mygrid">
-            <label htmlFor="upload">Upload ur showz </label>
-            <input
-              type="file"
-              id="upload"
-              onChange={e => {
-                const files = e.target.files
-                if (files && files.length) {
-                  setFiles(files)
-                }
-              }}
-            />
-            <label htmlFor={'username'}>DJ</label>
-            <input
-              id="username"
-              type="text"
-              value={user}
-              onChange={event => setUser(event.target.value)}
-            />
-            <label htmlFor="tracklist">Tracklist</label>
-            <Tracklist value={value} setValue={val => setValue(val)} />
+        }}
+      >
+        {password ? (
+          <div className="form">
+            <div className="mygrid">
+              <label htmlFor="upload">Upload ur showz </label>
+              <input
+                type="file"
+                id="upload"
+                onChange={e => {
+                  const files = e.target.files
+                  if (files && files.length) {
+                    setFiles(files)
+                  }
+                }}
+              />
+              <label htmlFor={'username'}>DJ</label>
+              <input
+                id="username"
+                type="text"
+                value={user}
+                onChange={event => setUser(event.target.value)}
+              />
+              <label htmlFor="tracklist">Tracklist</label>
+              <Tracklist value={value} setValue={val => setValue(val)} />
+            </div>
+            <button type="submit">Submit</button>
           </div>
-          <button type="submit">Submit</button>
-        </div>
-      ) : null}
-      {error ? <h1 className="error">{`${error}`}</h1> : null}
-      {loading ? <h1 className="loading">{`${loading}`}</h1> : null}
-    </form>
+        ) : null}
+        {error ? <h1 className="error">{`${error}`}</h1> : null}
+        {loading ? <h1 className="loading">{`${loading}`}</h1> : null}
+      </form>
     </div>
   )
 }

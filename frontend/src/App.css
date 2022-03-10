@@ -12,17 +12,17 @@
 h1 {
   margin: 0;
   color: #faa;
-  text-shadow: 4px 4px #00f;
+  text-shadow: 2px 2px #00f;
 }
 
 label {
   color: #faa;
-  text-shadow: 4px 4px #00f;
+  text-shadow: 2px 2px #00f;
   margin-right: 1em;
 }
 
 input[type='file']::file-selector-button {
-  padding: 0.2em 0.4em;
+  padding: 0.2vw 0.4em;
   background-color: #a29bfe;
 }
 
@@ -33,14 +33,22 @@ input[type='file']::file-selector-button:hover {
 
 form input {
   font-size: 1em;
+  max-width: 100%;
 }
 
 textarea {
   font-size: 1em;
+  max-width: 100%;
 }
 .row {
   display: block;
-  margin: 2em;
+  margin: 2vw;
+}
+
+@media only screen and (max-width: 600px) {
+  .mygrid {
+    display: block !important;
+  }
 }
 
 .mygrid {
@@ -49,34 +57,13 @@ textarea {
   grid-template-columns: max-content max-content;
 }
 
-@media only screen and (max-width: 600px) {
-  .form,
-  .row,
-  .container {
-    margin-left: 0px !important;
-    margin-right: 0px !important;
-  }
-  .post {
-    padding: 5px !important;
-  }
-  .spacer {
-    margin: 0px !important;
-  }
-}
-
-@media only screen and (max-width: 600px) {
-  .audiofile {
-    width: 100% !important;
-  }
-}
-
 .form {
-  margin: 1em;
+  margin: 1vw;
 }
 
 .error {
   color: #f00;
-  text-shadow: 4px 4px #000;
+  text-shadow: 2px 2px #000;
 }
 
 button {
@@ -86,9 +73,9 @@ button {
 }
 
 .container {
-  margin-left: 2em;
-  margin-right: 2em;
-  margin-top: 2em;
+  margin-left: 2vw;
+  margin-right: 2vw;
+  margin-top: 2vw;
   margin-bottom: 20em;
 }
 
@@ -97,22 +84,22 @@ button {
 }
 
 .post {
-  padding: 2em;
+  padding: 2vw;
   color: #0f0;
   text-shadow: 2px 2px #000;
   background-image: linear-gradient(red, yellow);
-  margin-bottom: 2em;
+  margin-bottom: 2vw;
 }
 
 .spacer {
-  margin: 3em;
+  margin: 3vw;
 }
 
 .tracklist {
   background-image: linear-gradient(to bottom right, green, blue);
   color: orange;
-  padding: 1em;
-  margintop: 1em;
+  padding: 1vw;
+  margin-top: 1em;
 }
 
 .comment {
@@ -126,15 +113,15 @@ button {
 
 .comments {
   background-image: linear-gradient(to bottom right, blue, brown);
-  padding: 1em;
+  padding: 1vw;
 }
 
 .commentform {
-  padding: 1em;
+  padding: 1vw;
 }
 
 .adminpanel {
-  margin: 2em;
-  padding: 1em;
+  margin: 2vw;
+  padding: 1vw;
   background-image: linear-gradient(#8fc, #f93);
 }
