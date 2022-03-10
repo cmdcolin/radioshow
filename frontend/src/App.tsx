@@ -13,9 +13,7 @@ interface File {
   user: string
   message: string
   date: string
-  contentType: string
-  comments: { timestamp: number; user: string; message: string }[]
-  exifTimestamp: number
+  comments?: { timestamp: number; user: string; message: string }[]
 }
 
 function getPassword() {
@@ -30,7 +28,7 @@ function shuffle<T>(arr: T[]) {
     .map(({ value }) => value)
 }
 
-function Tracklist({
+function EditTracklist({
   value,
   setValue,
 }: {
@@ -51,6 +49,7 @@ function Tracklist({
 
 function AdminPanel() {
   const [files, setFiles] = useState<FileList>()
+  const [pics, setPics] = useState<FileList>()
   const [error, setError] = useState<unknown>()
   const [value, setValue] = useState('')
   const [user, setUser] = useState('')
@@ -66,13 +65,16 @@ function AdminPanel() {
             setError(undefined)
             const data = new FormData()
             const file = files?.[0]
+            const pic = pics?.[0]
             if (!file) {
               throw new Error('No files submitted')
             }
             data.append('message', value)
             data.append('user', user)
             data.append('filename', file.name)
-            data.append('contentType', file.type)
+            if (pic) {
+              data.append('pic', pic.name)
+            }
             data.append('password', password || '')
 
             setLoading('Uploading metadata....')
@@ -80,12 +82,20 @@ function AdminPanel() {
               method: 'POST',
               body: data,
             })
-            setLoading('Uploading mp3...')
+
+            setLoading('Uploading ...')
 
             await myfetch(res.uploadURL, {
               method: 'PUT',
               body: file,
             })
+
+            if (res.uploadThumbnailURL) {
+              await myfetch(res.uploadThumbnailURL, {
+                method: 'PUT',
+                body: file,
+              })
+            }
           } catch (e) {
             console.error(e)
             setError(e)
@@ -94,33 +104,44 @@ function AdminPanel() {
           }
         }}
       >
-        {password ? (
-          <div className="form">
-            <div className="mygrid">
-              <label htmlFor="upload">Upload ur showz </label>
-              <input
-                type="file"
-                id="upload"
-                onChange={e => {
-                  const files = e.target.files
-                  if (files && files.length) {
-                    setFiles(files)
-                  }
-                }}
-              />
-              <label htmlFor={'username'}>DJ</label>
-              <input
-                id="username"
-                type="text"
-                value={user}
-                onChange={event => setUser(event.target.value)}
-              />
-              <label htmlFor="tracklist">Tracklist</label>
-              <Tracklist value={value} setValue={val => setValue(val)} />
-            </div>
-            <button type="submit">Submit</button>
+        <div className="form">
+          <div className="mygrid">
+            <label htmlFor="upload">Upload ur mp3 </label>
+            <input
+              type="file"
+              id="upload"
+              accept="audio/*"
+              onChange={e => {
+                const files = e.target.files
+                if (files && files.length) {
+                  setFiles(files)
+                }
+              }}
+            />
+            <label htmlFor="pic">Upload art </label>
+            <input
+              type="file"
+              id="pic"
+              accept="image/*"
+              onChange={e => {
+                const files = e.target.files
+                if (files && files.length) {
+                  setPics(files)
+                }
+              }}
+            />
+            <label htmlFor={'username'}>DJ</label>
+            <input
+              id="username"
+              type="text"
+              value={user}
+              onChange={event => setUser(event.target.value)}
+            />
+            <label htmlFor="tracklist">Tracklist</label>
+            <EditTracklist value={value} setValue={val => setValue(val)} />
           </div>
-        ) : null}
+          <button type="submit">Submit</button>
+        </div>
         {error ? <h1 className="error">{`${error}`}</h1> : null}
         {loading ? <h1 className="loading">{`${loading}`}</h1> : null}
       </form>
@@ -130,19 +151,19 @@ function AdminPanel() {
 
 function Comments({ post }: { post: File }) {
   const [showForm, setShowForm] = useState(false)
-  const { comments } = post
+  const { comments = [] } = post
 
   return (
     <div className="comments">
       <div>Comments</div>
       {comments.length ? (
-        comments.map(comment => (
-          <div key={JSON.stringify(comment)} className="comment">
+        comments.map(({ timestamp, user, message }) => (
+          <div key={timestamp} className="comment">
             <div className="comment">
-              {comment.user} ({new Date(comment.timestamp).toLocaleDateString()}
+              {user} ({new Date(timestamp).toLocaleDateString()}
               ):
               <br />
-              {comment.message}
+              {message}
             </div>
           </div>
         ))
@@ -303,7 +324,7 @@ function EditPost({
           onChange={event => setUsername(event.target.value)}
         />
         <label htmlFor="tracklist">Edit tracklist</label>{' '}
-        <Tracklist value={message} setValue={val => setMessage(val)} />
+        <EditTracklist value={message} setValue={val => setMessage(val)} />
       </div>
       <button type="submit">Submit</button>
       <button onClick={() => onComplete()}>Cancel</button>
@@ -359,15 +380,18 @@ function DeletePost({
 function DisplayPost({ post }: { post: File }) {
   const [showTracklist, setShowTracklist] = useState(true)
   const [showComments, setShowComments] = useState(true)
-  const file = BUCKET + '/' + post.filename
+  const { timestamp, user, message, filename } = post
+  const file = BUCKET + '/' + filename
+
+  console.log({ timestamp })
   return (
     <div>
-      <div className="date">{new Date(post.timestamp).toLocaleString()}</div>
-      <div className="dj">DJ {post.user}</div>
+      <div className="date">{new Date(timestamp).toLocaleString()}</div>
+      <div className="dj">DJ {user}</div>
       <button onClick={() => setShowTracklist(t => !t)}>
         {showTracklist ? 'Hide tracklist' : 'Show tracklist'}
       </button>
-      {showTracklist ? <div className="tracklist">{post.message}</div> : null}
+      {showTracklist ? <div className="tracklist">{message}</div> : null}
       <br />
 
       <button onClick={() => setShowComments(t => !t)}>
@@ -491,6 +515,8 @@ function App() {
       window.removeEventListener('resize', measure)
     }
   }, [update])
+
+  const password = getPassword()
   return (
     <div className="App">
       <canvas ref={ref} className="global" />
@@ -516,7 +542,7 @@ function App() {
             onChange={event => (refB.current = +event.target.value)}
           />
         </div>
-        <AdminPanel />
+        {password ? <AdminPanel /> : null}
         {error ? (
           <h1>{`${error}`}</h1>
         ) : posts ? (
@@ -529,6 +555,7 @@ function App() {
             key={elt}
             src={'gifs/' + elt}
             className="spacer"
+            loading="lazy"
             style={{ transform: `scale(${1 + Math.random() * 2})` }}
           />
         ))}
@@ -537,6 +564,7 @@ function App() {
             key={elt}
             src={'gifs/' + elt}
             className="spacer"
+            loading="lazy"
             style={{ transform: `scale(${1 + Math.random() * 2})` }}
           />
         ))}
@@ -545,6 +573,7 @@ function App() {
             key={elt}
             src={'gifs/' + elt}
             className="spacer"
+            loading="lazy"
             style={{ transform: `scale(${1 + Math.random() * 2})` }}
           />
         ))}

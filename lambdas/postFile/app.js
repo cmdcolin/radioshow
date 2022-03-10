@@ -17,7 +17,7 @@ exports.handler = async event => {
 const getUploadURL = async function (event) {
   try {
     const data = multipart.parse(event)
-    const { filename, contentType, user, message, password } = data
+    const { filename, pic, user, message, password } = data
     if (password !== process.env.Password) {
       return {
         statusCode: 403,
@@ -26,13 +26,13 @@ const getUploadURL = async function (event) {
     }
     const timestamp = +Date.now()
     const Key = `${timestamp}-${filename}`
+    const ThumbKey = `${timestamp}-thumb-${filename}`
 
-    const uploadThumbnailURL = contentType.startsWith('image')
+    const uploadThumbnailURL = pic
       ? await s3.getSignedUrlPromise('putObject', {
           Bucket: process.env.UploadBucket,
-          Key: `thumbnail-${Key}`,
+          Key: ThumbKey,
           Expires: URL_EXPIRATION_SECONDS,
-          ContentType: contentType,
           ACL: 'public-read',
         })
       : undefined
@@ -41,7 +41,6 @@ const getUploadURL = async function (event) {
       Bucket: process.env.UploadBucket,
       Key,
       Expires: URL_EXPIRATION_SECONDS,
-      ContentType: contentType,
       ACL: 'public-read',
     })
 
@@ -50,14 +49,15 @@ const getUploadURL = async function (event) {
       Item: {
         timestamp,
         filename: Key,
+        thumbnail: ThumbKey,
         message,
         user,
-        contentType,
       },
     }).promise()
 
     return JSON.stringify({
       uploadURL,
+      uploadPicURL,
       uploadThumbnailURL,
       Key,
     })

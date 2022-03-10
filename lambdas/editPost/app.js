@@ -28,12 +28,15 @@ const getUploadURL = async function (event) {
       Key: {
         filename,
       },
-      UpdateExpression: 'set user = :user, message=:message',
+      UpdateExpression: 'set #us = :u, message=:m',
       ExpressionAttributeValues: {
-        ':message': message,
-        ':user': user,
+        ':m': message,
+        ':u': user,
       },
       ReturnValues: 'UPDATED_NEW',
+      ExpressionAttributeNames: {
+        '#us': 'user',
+      },
     }).promise()
 
     return JSON.stringify({

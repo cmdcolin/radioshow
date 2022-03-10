@@ -96,10 +96,11 @@ button {
 }
 
 .tracklist {
-  background-image: linear-gradient(to bottom right, green, blue);
+  background-image: linear-gradient(to bottom right, green, orange);
   color: orange;
   padding: 1vw;
   margin-top: 1em;
+  white-space: pre;
 }
 
 .comment {
