@@ -1,10 +1,10 @@
 import { useEffect, useState, useRef } from 'react'
+import { myfetchjson, myfetch } from './util'
 import './App.css'
-import { myfetchjson } from './util'
 
-const API_ENDPOINT = 'https://fjgbqj4324.execute-api.us-east-2.amazonaws.com'
+const API_ENDPOINT = 'https://azn63btds4.execute-api.us-east-2.amazonaws.com'
 const BUCKET =
-  'https://sam-app-s3uploadbucket-1fyrebt7g2tr3.s3.us-east-2.amazonaws.com'
+  'https://radioshow-s3uploadbucket-hkjnp01vb17m.s3.us-east-2.amazonaws.com'
 
 interface File {
   timestamp: number
@@ -17,8 +17,121 @@ interface File {
   exifTimestamp: number
 }
 
-function Files({ files }: { files: File[] }) {
-  return <h1>Hello {files}</h1>
+function AdminPanel() {
+  const [files, setFiles] = useState<FileList>()
+  const [error, setError] = useState<unknown>()
+  const [value, setValue] = useState('')
+  const [user, setUser] = useState('')
+  const [loading, setLoading] = useState('')
+  const params = new URLSearchParams(window.location.search)
+
+  const password = params.get('password')
+  return (
+    <form
+      onSubmit={async event => {
+        event.preventDefault()
+        try {
+          setError(undefined)
+          const data = new FormData()
+          const file = files?.[0]
+          if (!file) {
+            throw new Error('No files submitted')
+          }
+          data.append('message', value)
+          data.append('user', user)
+          data.append('filename', file.name)
+          data.append('contentType', file.type)
+          data.append('password', password || '')
+
+          setLoading('Uploading metadata....')
+          const res = await myfetchjson(API_ENDPOINT + '/postFile', {
+            method: 'POST',
+            body: data,
+          })
+          setLoading('Uploading mp3...')
+
+          await myfetch(res.uploadURL, {
+            method: 'PUT',
+            body: file,
+          })
+        } catch (e) {
+          console.error(e)
+          setError(e)
+        } finally {
+          setLoading('')
+        }
+      }}
+    >
+      {password ? (
+        <div className="form">
+          <div className="mygrid">
+            <label htmlFor="upload">Upload ur showz </label>
+            <input
+              type="file"
+              id="upload"
+              onChange={e => {
+                const files = e.target.files
+                if (files && files.length) {
+                  setFiles(files)
+                }
+              }}
+            />
+            <label htmlFor={'username'}>DJ</label>
+            <input
+              id="username"
+              type="text"
+              value={user}
+              onChange={event => setUser(event.target.value)}
+            />
+            <label htmlFor="tracklist">Tracklist</label>
+            <textarea
+              id="tracklist"
+              placeholder="tracklist"
+              onChange={event => setValue(event.target.value)}
+              value={value}
+              rows={5}
+              cols={50}
+            />
+          </div>
+          <button type="submit">Submit</button>
+        </div>
+      ) : null}
+      {error ? <h1 className="error">{`${error}`}</h1> : null}
+      {loading ? <h1 className="loading">{`${loading}`}</h1> : null}
+    </form>
+  )
+}
+
+function Post({ post }: { post: File }) {
+  const [tracklist, setTracklist] = useState(false)
+  const file = BUCKET + '/' + post.filename
+  return (
+    <div className="post">
+      <div className="date">{new Date(post.timestamp).toLocaleString()}</div>
+      <div className="dj">DJ {post.user}</div>
+      <a href="#" onClick={() => setTracklist(t => !t)}>
+        {tracklist ? 'Hide' : 'Show'} tracklist
+      </a>
+      {tracklist ? <div className="tracklist">{post.message}</div> : null}
+      <br />
+      <a href={file}>Download</a>
+      <br />
+      <audio controls className="audiofile">
+        <source src={file} />
+      </audio>
+    </div>
+  )
+}
+
+function Posts({ posts }: { posts: File[] }) {
+  return (
+    <div className="container">
+      <h1>{posts.length ? 'Posts:' : 'No files found'}</h1>
+      {posts.map(post => (
+        <Post key={post.filename} post={post} />
+      ))}
+    </div>
+  )
 }
 
 function App() {
@@ -27,14 +140,14 @@ function App() {
   const refR = useRef(20)
   const refG = useRef(20)
   const refB = useRef(20)
-  const [files, setFiles] = useState<File[]>()
+  const [posts, setPosts] = useState<File[]>()
   const [error, setError] = useState<unknown>()
 
   useEffect(() => {
     ;(async () => {
       try {
         const result = await myfetchjson(API_ENDPOINT + '/getFiles')
-        setFiles(result.Items)
+        setPosts(result.Items)
       } catch (e) {
         setError(e)
       }
@@ -67,9 +180,10 @@ function App() {
     function loop(ctx: CanvasRenderingContext2D, counter: number) {
       for (let i = 0; i < 50; i++) {
         const l = Math.floor(Math.random() * 100)
-        ctx.strokeStyle = `rgb(${l + Math.random() * refR.current},${
-          l + Math.random() * refG.current
-        },${l + Math.random() * refB.current})`
+        const r = l + Math.random() * refR.current
+        const g = l + Math.random() * refG.current
+        const b = l + Math.random() * refB.current
+        ctx.strokeStyle = `rgb(${r},${g},${b})`
         ctx.beginPath()
         const flipper = i % 2 === 1 ? 1 : -1
         const x = Math.random() * width - width / 2
@@ -96,6 +210,7 @@ function App() {
     <div>
       <canvas ref={ref} className="global" />
       <div className="contents">
+        <h1>rdio rkiv</h1>
         <input
           type="range"
           min={1}
@@ -114,10 +229,11 @@ function App() {
           max={100}
           onChange={event => (refB.current = +event.target.value)}
         />
+        <AdminPanel />
         {error ? (
           <h1>{`${error}`}</h1>
-        ) : files ? (
-          <Files files={files} />
+        ) : posts ? (
+          <Posts posts={posts} />
         ) : (
           <h1>Loading...</h1>
         )}

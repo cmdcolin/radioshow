@@ -1,7 +1,8 @@
 export async function myfetch(params: string, opts?: any) {
   const response = await fetch(params, opts)
   if (!response.ok) {
-    throw new Error(`HTTP ${response.status} ${response.statusText}`)
+    const res = await response.json()
+    throw new Error(`HTTP ${response.status} - ${res.message}`)
   }
   return response
 }
