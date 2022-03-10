@@ -53,13 +53,14 @@ textarea {
   .form,
   .row,
   .container {
-    margin: 0px !important;
+    margin-left: 0px !important;
+    margin-right: 0px !important;
   }
   .post {
     padding: 5px !important;
   }
   .spacer {
-    margin: 20px;
+    margin: 0px !important;
   }
 }
 
@@ -83,7 +84,10 @@ button[type='submit'] {
 }
 
 .container {
-  margin: 2em;
+  margin-left: 2em;
+  margin-right: 2em;
+  margin-top: 2em;
+  margin-bottom: 20em;
 }
 
 .audiofile {

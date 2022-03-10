@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { myfetchjson, myfetch } from './util'
 import './App.css'
+import files from './files.json'
 
 const API_ENDPOINT = 'https://azn63btds4.execute-api.us-east-2.amazonaws.com'
 const BUCKET =
@@ -16,70 +17,7 @@ interface File {
   comments: unknown[]
   exifTimestamp: number
 }
-const files = [
-  '4simma.gif',
-  'A_9torch2.gif',
-  'AAlienblend.gif',
-  'aliengreen.gif',
-  'alienred.gif',
-  'alienyellow.gif',
-  'anicntr.gif',
-  'anishark16.gif',
-  'antban.gif',
-  'Antenna.gif',
-  'ant.gif',
-  'antmail.gif',
-  'arg-alien-stroll-url.gif',
-  'Baby-04.gif',
-  'back_flash.gif',
-  'bar1.gif',
-  'beach_with_flying_pelican.gif',
-  'blkanchor.gif',
-  'box4.gif',
-  'bushfire.gif',
-  'chihuahua_alienship_wm.gif',
-  'christianraves.gif',
-  'Cigare_Russe.jpg',
-  'coconutanimation.gif',
-  'coconut.gif',
-  'dancingalien.gif',
-  'earthspin2.gif',
-  'em072.gif',
-  'FIELDO5TR.gif',
-  'flag.gif',
-  'flame.gif',
-  'gbk.gif',
-  'HcoconutTree.gif',
-  'housfire2.gif',
-  'Jackindabox.gif',
-  'jm-flag1.gif',
-  'joseph_ferri_re.jpg',
-  'Kitty-on-Mailbox.gif',
-  'lightbar_AnT.gif',
-  'lightningbar.gif',
-  'linartg.gif',
-  'note80D2.gif',
-  'phases.gif',
-  'picbanner2.gif',
-  'pirate_flag.gif',
-  'ppalien.gif',
-  'r02.jpg',
-  'r04.jpg',
-  'rabbit2.gif',
-  'rad3d.gif',
-  'radio2.gif',
-  'radioact.gif',
-  'smiling.gif',
-  'SVA_3D_HEADLINE.gif',
-  'TgC_favorito23.gif',
-  'tikigod.gif',
-  'torch-1.gif',
-  'torch_sm_clr.gif',
-  'tr1.gif',
-  'WtVbug.gif',
-  'yamorun.gif',
-  'yyang2.gif',
-]
+
 function shuffle<T>(arr: T[]) {
   return arr
     .map(value => ({ value, sort: Math.random() }))
@@ -281,24 +219,26 @@ function App() {
       <canvas ref={ref} className="global" />
       <div className="contents">
         <h1>rdio rkiv</h1>
-        <input
-          type="range"
-          min={1}
-          max={100}
-          onChange={event => (refR.current = +event.target.value)}
-        />
-        <input
-          type="range"
-          min={1}
-          max={100}
-          onChange={event => (refG.current = +event.target.value)}
-        />
-        <input
-          type="range"
-          min={1}
-          max={100}
-          onChange={event => (refB.current = +event.target.value)}
-        />
+        <div style={{ position: 'sticky', top: 20 }}>
+          <input
+            type="range"
+            min={1}
+            max={100}
+            onChange={event => (refR.current = +event.target.value)}
+          />
+          <input
+            type="range"
+            min={1}
+            max={100}
+            onChange={event => (refG.current = +event.target.value)}
+          />
+          <input
+            type="range"
+            min={1}
+            max={100}
+            onChange={event => (refB.current = +event.target.value)}
+          />
+        </div>
         <AdminPanel />
         {error ? (
           <h1>{`${error}`}</h1>
