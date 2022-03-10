@@ -1,5 +1,25 @@
 import { useEffect, useState, useRef } from 'react'
 import './App.css'
+import { myfetchjson } from './util'
+
+const API_ENDPOINT = 'https://fjgbqj4324.execute-api.us-east-2.amazonaws.com'
+const BUCKET =
+  'https://sam-app-s3uploadbucket-1fyrebt7g2tr3.s3.us-east-2.amazonaws.com'
+
+interface File {
+  timestamp: number
+  filename: string
+  user: string
+  message: string
+  date: string
+  contentType: string
+  comments: unknown[]
+  exifTimestamp: number
+}
+
+function Files({ files }: { files: File[] }) {
+  return <h1>Hello {files}</h1>
+}
 
 function App() {
   const ref = useRef<HTMLCanvasElement>(null)
@@ -7,6 +27,20 @@ function App() {
   const refR = useRef(20)
   const refG = useRef(20)
   const refB = useRef(20)
+  const [files, setFiles] = useState<File[]>()
+  const [error, setError] = useState<unknown>()
+
+  useEffect(() => {
+    ;(async () => {
+      try {
+        const result = await myfetchjson(API_ENDPOINT + '/getFiles')
+        setFiles(result.Items)
+      } catch (e) {
+        setError(e)
+      }
+    })()
+  }, [])
+
   useEffect(() => {
     const canvas = ref.current
     if (!canvas) {
@@ -80,7 +114,13 @@ function App() {
           max={100}
           onChange={event => (refB.current = +event.target.value)}
         />
-
+        {error ? (
+          <h1>{`${error}`}</h1>
+        ) : files ? (
+          <Files files={files} />
+        ) : (
+          <h1>Loading...</h1>
+        )}
         <h1>RADIO PRISM</h1>
         <h1>RADIO PRISM</h1>
         <h1>RADIO PRISM</h1>
