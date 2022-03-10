@@ -281,7 +281,9 @@ function EditPost({
               method: 'POST',
               body: data,
             })
+            onComplete()
           }
+          throw new Error('Enter username / message')
         } catch (e) {
           setError(e)
         } finally {
