@@ -4,6 +4,9 @@ import './App.css'
 function App() {
   const ref = useRef<HTMLCanvasElement>(null)
   const [update, setUpdate] = useState(0)
+  const refR = useRef(20)
+  const refG = useRef(20)
+  const refB = useRef(20)
   useEffect(() => {
     const canvas = ref.current
     if (!canvas) {
@@ -30,9 +33,9 @@ function App() {
     function loop(ctx: CanvasRenderingContext2D, counter: number) {
       for (let i = 0; i < 50; i++) {
         const l = Math.floor(Math.random() * 100)
-        ctx.strokeStyle = `rgb(${l - Math.random() * 20},${
-          l + Math.random() * 20
-        },${l + Math.random() * 20})`
+        ctx.strokeStyle = `rgb(${l + Math.random() * refR.current},${
+          l + Math.random() * refG.current
+        },${l + Math.random() * refB.current})`
         ctx.beginPath()
         const flipper = i % 2 === 1 ? 1 : -1
         const x = Math.random() * width - width / 2
@@ -59,6 +62,25 @@ function App() {
     <div>
       <canvas ref={ref} className="global" />
       <div className="contents">
+        <input
+          type="range"
+          min={1}
+          max={100}
+          onChange={event => (refR.current = +event.target.value)}
+        />
+        <input
+          type="range"
+          min={1}
+          max={100}
+          onChange={event => (refG.current = +event.target.value)}
+        />
+        <input
+          type="range"
+          min={1}
+          max={100}
+          onChange={event => (refB.current = +event.target.value)}
+        />
+
         <h1>RADIO PRISM</h1>
         <h1>RADIO PRISM</h1>
         <h1>RADIO PRISM</h1>

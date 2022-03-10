@@ -15,7 +15,7 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: "5"
         WriteCapacityUnits: "5"
-      TableName: "files"
+      TableName: "filesRadio"
 
   guestbookDynamoDBTable:
     Type: AWS::DynamoDB::Table
@@ -29,7 +29,7 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: "5"
         WriteCapacityUnits: "5"
-      TableName: "guestbook"
+      TableName: "guestbookRadio"
   MyApi:
     Type: AWS::Serverless::HttpApi
     Properties:
