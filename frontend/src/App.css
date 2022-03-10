@@ -55,6 +55,9 @@ textarea {
   .post {
     padding: 5px !important;
   }
+  .spacer {
+    margin: 20px;
+  }
 }
 
 @media only screen and (max-width: 600px) {
@@ -90,4 +93,8 @@ button[type='submit'] {
   text-shadow: 2px 2px #000;
   background-image: linear-gradient(red, yellow);
   margin-bottom: 2em;
+}
+
+.spacer {
+  margin: 3em;
 }

@@ -16,6 +16,76 @@ interface File {
   comments: unknown[]
   exifTimestamp: number
 }
+const files = [
+  '4simma.gif',
+  'A_9torch2.gif',
+  'AAlienblend.gif',
+  'aliengreen.gif',
+  'alienred.gif',
+  'alienyellow.gif',
+  'anicntr.gif',
+  'anishark16.gif',
+  'antban.gif',
+  'Antenna.gif',
+  'ant.gif',
+  'antmail.gif',
+  'arg-alien-stroll-url.gif',
+  'Baby-04.gif',
+  'back_flash.gif',
+  'bar1.gif',
+  'beach_with_flying_pelican.gif',
+  'blkanchor.gif',
+  'box4.gif',
+  'bushfire.gif',
+  'chihuahua_alienship_wm.gif',
+  'christianraves.gif',
+  'Cigare_Russe.jpg',
+  'coconutanimation.gif',
+  'coconut.gif',
+  'dancingalien.gif',
+  'earthspin2.gif',
+  'em072.gif',
+  'FIELDO5TR.gif',
+  'flag.gif',
+  'flame.gif',
+  'gbk.gif',
+  'HcoconutTree.gif',
+  'housfire2.gif',
+  'Jackindabox.gif',
+  'jm-flag1.gif',
+  'joseph_ferri_re.jpg',
+  'Kitty-on-Mailbox.gif',
+  'lightbar_AnT.gif',
+  'lightningbar.gif',
+  'linartg.gif',
+  'note80D2.gif',
+  'phases.gif',
+  'picbanner2.gif',
+  'pirate_flag.gif',
+  'ppalien.gif',
+  'r02.jpg',
+  'r04.jpg',
+  'rabbit2.gif',
+  'rad3d.gif',
+  'radio2.gif',
+  'radioact.gif',
+  'smiling.gif',
+  'SVA_3D_HEADLINE.gif',
+  'TgC_favorito23.gif',
+  'tikigod.gif',
+  'torch-1.gif',
+  'torch_sm_clr.gif',
+  'tr1.gif',
+  'WtVbug.gif',
+  'yamorun.gif',
+  'yyang2.gif',
+]
+function shuffle<T>(arr: T[]) {
+  return arr
+    .map(value => ({ value, sort: Math.random() }))
+    .sort((a, b) => a.sort - b.sort)
+    .map(({ value }) => value)
+}
 
 function AdminPanel() {
   const [files, setFiles] = useState<FileList>()
@@ -237,38 +307,27 @@ function App() {
         ) : (
           <h1>Loading...</h1>
         )}
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
-        <h1>RADIO PRISM</h1>
+        {shuffle(files).map(elt => (
+          <img
+            src={'gifs/' + elt}
+            className="spacer"
+            style={{ transform: `scale(${1 + Math.random() * 2})` }}
+          />
+        ))}
+        {shuffle(files).map(elt => (
+          <img
+            src={'gifs/' + elt}
+            className="spacer"
+            style={{ transform: `scale(${1 + Math.random() * 2})` }}
+          />
+        ))}
+        {shuffle(files).map(elt => (
+          <img
+            src={'gifs/' + elt}
+            className="spacer"
+            style={{ transform: `scale(${1 + Math.random() * 2})` }}
+          />
+        ))}
       </div>
     </div>
   )
