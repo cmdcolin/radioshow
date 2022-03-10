@@ -277,7 +277,7 @@ function App() {
     }
   }, [update])
   return (
-    <div>
+    <div className="App">
       <canvas ref={ref} className="global" />
       <div className="contents">
         <h1>rdio rkiv</h1>
