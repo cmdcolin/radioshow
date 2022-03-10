@@ -233,7 +233,31 @@ function EditIcon({ onClick }: { onClick: () => void }) {
   )
 }
 
-function EditPost({ post }: { post: File }) {
+function DeleteIcon({ onClick }: { onClick: () => void }) {
+  return (
+    <button onClick={onClick}>
+      <svg style={{ width: 24, height: 24 }} viewBox="0 0 24 24">
+        <path
+          fill="currentColor"
+          d="M14.06,9L15,9.94L5.92,19H5V18.08L14.06,9M17.66,3C17.41,3 17.15,3.1 16.96,3.29L15.13,5.12L18.88,8.87L20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18.17,3.09 17.92,3 17.66,3M14.06,6.19L3,17.25V21H6.75L17.81,9.94L14.06,6.19Z"
+        />
+
+        <path
+          fill="currentColor"
+          d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"
+        />
+      </svg>
+    </button>
+  )
+}
+
+function EditPost({
+  post,
+  onComplete,
+}: {
+  post: File
+  onComplete: () => void
+}) {
   const [username, setUsername] = useState(post.user)
   const [message, setMessage] = useState(post.message)
   const [error, setError] = useState<unknown>()
@@ -249,7 +273,6 @@ function EditPost({ post }: { post: File }) {
             setError(undefined)
 
             const data = new FormData()
-            console.log({ post })
             data.append('message', message)
             data.append('user', username)
             data.append('filename', post.filename)
@@ -266,23 +289,65 @@ function EditPost({ post }: { post: File }) {
         }
       }}
     >
-      <div>
-        {error ? <div className="error">{`${error}`}</div> : null}
-        {loading ? <div>Submitting update...</div> : null}
-        <h1>Edit some stuff</h1>
-        <div className="mygrid">
-          <label htmlFor="username">Edit DJ name</label>{' '}
-          <input
-            id="username"
-            type="text"
-            value={username}
-            onChange={event => setUsername(event.target.value)}
-          />
-          <label htmlFor="tracklist">Edit tracklist</label>{' '}
-          <Tracklist value={message} setValue={val => setMessage(val)} />
-        </div>
+      {error ? <div className="error">{`${error}`}</div> : null}
+      {loading ? <div>Submitting update...</div> : null}
+      <h1>Edit some stuff</h1>
+      <div className="mygrid">
+        <label htmlFor="username">Edit DJ name</label>{' '}
+        <input
+          id="username"
+          type="text"
+          value={username}
+          onChange={event => setUsername(event.target.value)}
+        />
+        <label htmlFor="tracklist">Edit tracklist</label>{' '}
+        <Tracklist value={message} setValue={val => setMessage(val)} />
       </div>
+      <button type="submit">Submit</button>
+      <button onClick={() => onComplete()}>Cancel</button>
     </form>
+  )
+}
+
+function DeletePost({
+  post,
+  onComplete,
+}: {
+  post: File
+  onComplete: () => void
+}) {
+  const [error, setError] = useState<unknown>()
+  const [loading, setLoading] = useState(false)
+  const password = getPassword()
+  return (
+    <div className="deletepost">
+      {error ? <div className="error">{`${error}`}</div> : null}
+      {loading ? 'Deleting post...' : null}
+      <button
+        onClick={async event => {
+          try {
+            event.preventDefault()
+            setLoading(true)
+            setError(undefined)
+
+            const data = new FormData()
+            data.append('filename', post.filename)
+            data.append('password', password)
+            await myfetchjson(API_ENDPOINT + '/editPost', {
+              method: 'POST',
+              body: data,
+            })
+          } catch (e) {
+            setError(e)
+          } finally {
+            setLoading(false)
+          }
+        }}
+      >
+        Are you sure you want to delete post?
+      </button>
+      <button onClick={() => onComplete()}>Cancel</button>
+    </div>
   )
 }
 
@@ -316,16 +381,24 @@ function DisplayPost({ post }: { post: File }) {
 
 function Post({ post }: { post: File }) {
   const [editing, setEditing] = useState(false)
+  const [deletePost, setDeletePost] = useState(false)
   const password = getPassword()
   return (
     <div className="post">
       {password ? (
         <div style={{ float: 'right' }}>
           <EditIcon onClick={() => setEditing(!editing)} />
+          <DeleteIcon onClick={() => setDeletePost(!deletePost)} />
         </div>
       ) : null}
 
-      {editing ? <EditPost post={post} /> : <DisplayPost post={post} />}
+      {editing ? (
+        <EditPost post={post} onComplete={() => setEditing(false)} />
+      ) : deletePost ? (
+        <DeletePost post={post} onComplete={() => setDeletePost(false)} />
+      ) : (
+        <DisplayPost post={post} />
+      )}
     </div>
   )
 }

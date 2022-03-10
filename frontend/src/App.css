@@ -125,3 +125,7 @@ button {
   padding: 1vw;
   background-image: linear-gradient(#8fc, #f93);
 }
+
+.deletepost {
+  margin: 2vw;
+}
