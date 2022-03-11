@@ -86,17 +86,20 @@ function AdminPanel() {
 
             setLoading('Uploading ...')
 
-            await myfetch(res.uploadURL, {
+            const r1 = myfetch(res.uploadURL, {
               method: 'PUT',
               body: file,
             })
 
+            let r2
+
             if (res.uploadThumbnailURL) {
-              await myfetch(res.uploadThumbnailURL, {
+              r2 = myfetch(res.uploadThumbnailURL, {
                 method: 'PUT',
                 body: pic,
               })
             }
+            await Promise.all([r1, r2].filter(f => !!f))
             setLoading('Done!')
             setTimeout(() => setLoading(''), 5000)
           } catch (e) {
@@ -567,7 +570,7 @@ function App() {
     <div className="App">
       <canvas ref={ref} className="global" />
       <div className="contents">
-        <h1>rdio rkiv</h1>
+        <img src="eastside.png" style={{ maxWidth: '100%' }} />
         <div style={{ position: 'sticky', top: 20 }}>
           <input
             type="range"
